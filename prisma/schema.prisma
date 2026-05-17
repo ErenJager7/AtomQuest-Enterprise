@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String
+  role             String            @default("EMPLOYEE")
+  jobTitle         String
+  departmentId     String
+  department       Department        @relation(fields: [departmentId], references: [id])
+  managerId        String?
+  manager          User?             @relation("ManagerToEmployee", fields: [managerId], references: [id])
+  employees        User[]            @relation("ManagerToEmployee")
+  goals            Goal[]            @relation("UserGoals")
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+  createdAt        DateTime          @default(now())
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     User[]
+  goals     Goal[]   @relation("DepartmentSharedGoals")
+}
+
+model GoalCycle {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "FY26 Q1"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  goals     Goal[]
+}
+
+model Goal {
+  id               String            @id @default(uuid())
+  title            String
+  description      String
+  thrustArea       String            // e.g., "Engineering Excellence"
+  uom              String            // Unit of Measure, e.g., "Percentage", "USD"
+  targetValue      Float
+  currentValue     Float             @default(0.0)
+  weightage        Int               // e.g., 25 (out of 100)
+  deadline         DateTime
+  status           String            @default("DRAFT")
+  isShared         Boolean           @default(false)
+  cycleId          String
+  cycle            GoalCycle         @relation(fields: [cycleId], references: [id])
+  employeeId       String
+  employee         User              @relation("UserGoals", fields: [employeeId], references: [id])
+  departmentId     String?
+  department       Department?       @relation("DepartmentSharedGoals", fields: [departmentId], references: [id])
+  checkIns         QuarterlyCheckIn[]
+  comments         Comment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model QuarterlyCheckIn {
+  id           String        @id @default(uuid())
+  goalId       String
+  goal         Goal          @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  quarter      Int           // 1, 2, 3, 4
+  status       String        @default("NOT_STARTED")
+  notes        String
+  achievement  Float
+  feedback     String?
+  reviewedBy   String?
+  updatedAt    DateTime      @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  goalId    String
+  goal      Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  authorId  String
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // e.g., "GOAL_APPROVED"
+  oldValue  String?
+  newValue  String?
+  ipAddress String?
+  timestamp DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
