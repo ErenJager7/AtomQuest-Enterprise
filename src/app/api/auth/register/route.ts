@@ -43,8 +43,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ user });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Register Error:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
