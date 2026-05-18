@@ -34,9 +34,14 @@ export async function middleware(request: NextRequest) {
   // IMPORTANT: Avoid writing any logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    console.error('Middleware Supabase Error:', error);
+    // Ignore error, let user be null to force redirect to login
+  }
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isApiAuthPage = request.nextUrl.pathname.startsWith('/api/auth')
