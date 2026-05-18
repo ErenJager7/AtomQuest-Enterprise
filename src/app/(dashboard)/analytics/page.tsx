@@ -209,9 +209,19 @@ function AnalyticsDashboardContent() {
               </div>
               <div className="w-full h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="65%" data={distributionData?.byThrustArea?.map(d => ({ subject: d.area, A: d.count * 10, B: d.count * 8, fullMark: 100 })) || []}>
+                  <RadarChart cx="50%" cy="50%" outerRadius="50%" margin={{ top: 10, right: 30, bottom: 10, left: 30 }} data={distributionData?.byThrustArea?.map(d => ({ subject: d.area, A: d.count * 10, B: d.count * 8, fullMark: 100 })) || []}>
                     <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                    <PolarAngleAxis 
+                      dataKey="subject" 
+                      tick={{ fill: '#94a3b8', fontSize: 10 }} 
+                      tickFormatter={(val) => {
+                        if (val === 'Engineering Excellence') return 'Engineering';
+                        if (val === 'Customer Success') return 'Cust. Success';
+                        if (val === 'Quality Assurance') return 'QA';
+                        if (val === 'Process Optimization') return 'Optimization';
+                        return val;
+                      }}
+                    />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                     <Radar name="Target" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
                     <Radar name="Actual" dataKey="B" stroke="#2dd4bf" fill="transparent" strokeWidth={2} />

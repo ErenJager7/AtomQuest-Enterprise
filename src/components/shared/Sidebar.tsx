@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { GoalCreateModal } from "../modals/GoalCreateModal";
 import { AddEmployeeModal } from "../modals/AddEmployeeModal";
 
@@ -28,6 +28,11 @@ export function Sidebar() {
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const [pillStyle, setPillStyle] = useState({ top: 0, height: 0, opacity: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const mainNav = [
     { 
@@ -62,7 +67,7 @@ export function Sidebar() {
     { title: "Settings", href: "/settings", icon: Settings },
   ];
 
-  const filteredNav = mainNav.filter(item => user && item.roles.includes(user.role));
+  const filteredNav = mounted && user ? mainNav.filter(item => item.roles.includes(user.role)) : [];
 
   // Measure active nav item to position the sliding pill
   useLayoutEffect(() => {
@@ -151,7 +156,7 @@ export function Sidebar() {
 
       {/* Action Buttons Based on Role */}
       <div className="px-4 mt-6 space-y-3">
-        {(user?.role === 'EMPLOYEE' || user?.role === 'MANAGER') && (
+        {mounted && (user?.role === 'EMPLOYEE' || user?.role === 'MANAGER') && (
           <button 
             onClick={() => setIsGoalModalOpen(true)}
             className="relative overflow-hidden w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl text-xs font-bold text-white transition-all duration-300 hover:scale-105 active:scale-95 group shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)]"
@@ -162,7 +167,7 @@ export function Sidebar() {
           </button>
         )}
         
-        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+        {mounted && (user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
           <button 
             onClick={() => setIsEmployeeModalOpen(true)}
             className="relative overflow-hidden w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-xl text-xs font-bold text-white transition-all duration-300 hover:scale-105 active:scale-95 group shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]"

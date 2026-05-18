@@ -17,15 +17,20 @@ export function Topbar() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const getGreeting = () => {
-    if (typeof window === "undefined") return "Hello";
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) return "☀️ Good Morning";
     if (hour >= 12 && hour < 17) return "🌤️ Good Afternoon";
     if (hour >= 17 && hour < 21) return "🌆 Good Evening";
     return "🌙 Good Night";
   };
-  const greeting = getGreeting();
+  const greeting = mounted ? getGreeting() : "Hello";
 
   useEffect(() => {
     if (user) {
@@ -171,15 +176,24 @@ export function Topbar() {
         {/* User Profile Dropdown */}
         <div className="flex items-center gap-4 pl-6 border-l border-white/10 relative">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-white leading-none mb-1">{user?.name || "Guest"}</p>
+            <p className="text-sm font-semibold text-white leading-none mb-1">{mounted && user ? user.name : "Guest"}</p>
             <div className="flex items-center gap-2 justify-end">
-              <span className={cn(
-                "text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
-                roleColors[user?.role || "EMPLOYEE"]
-              )}>
-                {user?.role || "EMPLOYEE"}
-              </span>
-              <p className="text-[10px] text-muted-foreground font-medium">{user?.jobTitle || "AtomQuest User"}</p>
+              {mounted && user ? (
+                <span className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                  roleColors[user.role]
+                )}>
+                  {user.role}
+                </span>
+              ) : (
+                <span className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                  roleColors.EMPLOYEE
+                )}>
+                  EMPLOYEE
+                </span>
+              )}
+              <p className="text-[10px] text-muted-foreground font-medium">{mounted && user ? user.jobTitle : "AtomQuest User"}</p>
             </div>
           </div>
           
@@ -188,7 +202,7 @@ export function Topbar() {
             className="flex items-center gap-2 group p-1 pr-2 rounded-xl hover:bg-white/5 transition-all border border-transparent hover:border-white/5"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary/20">
-              {user?.name?.split(' ').map((n: string) => n[0]).join('') || "U"}
+              {mounted && user ? user.name?.split(' ').map((n: string) => n[0]).join('') : "U"}
             </div>
             <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors" />
           </button>

@@ -12,7 +12,7 @@ export async function GET() {
     let totalCompletion = 0;
     goals.forEach(g => {
       if (g.targetValue > 0) {
-        totalCompletion += (g.currentValue / g.targetValue) * 100;
+        totalCompletion += Math.min((g.currentValue / g.targetValue) * 100, 100);
       }
     });
     const avgCompletion = totalGoals > 0 ? Math.round(totalCompletion / totalGoals) : 0;
